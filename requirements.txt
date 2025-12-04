@@ -1,0 +1,11 @@
+mcp[cli]
+apify-client
+python-dotenv
+fastmcp
+pdfplumber
+google-genai
+reportlab
+mcp
+streamlit
+nest_asyncio
+google-adk
