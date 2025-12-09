@@ -67,11 +67,6 @@ def run_async(coro):
     return loop.run_until_complete(coro)
 
 # --- Session State ---
-if "agent" not in st.session_state:
-    st.session_state.agent = RecruiterAgent()
-    # Initialize agent in background
-    run_async(st.session_state.agent.start_chat())
-
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
@@ -85,10 +80,38 @@ if "job_results" not in st.session_state:
 st.markdown('<div class="main-header">👔 AI Recruiter Agent</div>', unsafe_allow_html=True)
 st.markdown('<div class="text-center" style="text-align: center;">Your Personal Career Coach & Job Finder</div>', unsafe_allow_html=True)
 
-# --- Sidebar: Resume Upload ---
+# --- Sidebar: API Configuration & Resume Upload ---
 with st.sidebar:
+    st.header("Configuration")
+    
+    # 1. API Keys Inputs
+    gemini_key = st.text_input("Google Gemini API Key", type="password", help="Get it from Google AI Studio")
+    apify_token = st.text_input("Apify API Token", type="password", help="Get it from Apify Console")
+    
+    # Check if keys are available/provided
+    if not gemini_key:
+        st.warning("Please enter your Google Gemini API Key to continue.")
+    
+    if not apify_token:
+        st.warning("Please enter your Apify API Token to continue.")
+        
+    st.divider()
+
+    # Initialize Agent if keys are present
+    if gemini_key and apify_token:
+        if "agent" not in st.session_state:
+             with st.spinner("Initializing Agent..."):
+                try:
+                    st.session_state.agent = RecruiterAgent(gemini_api_key=gemini_key, apify_api_token=apify_token)
+                    # Initialize agent chat in background
+                    run_async(st.session_state.agent.start_chat())
+                    st.success("Agent Initialized!")
+                except Exception as e:
+                    st.error(f"Failed to initialize agent: {e}")
+    
+    # 2. Resume Upload
     st.header("Upload Resume")
-    uploaded_file = st.file_uploader("Choose a PDF file", type="pdf")
+    uploaded_file = st.file_uploader("Choose a PDF file", type="pdf", disabled=not (gemini_key and apify_token))
     
     if uploaded_file is not None and not st.session_state.analysis_done:
         with st.spinner("Analyzing Resume..."):
@@ -137,10 +160,13 @@ if prompt := st.chat_input("Ask about your resume, skills, or jobs..."):
 
     # Get Agent Response
     with st.chat_message("assistant"):
-        with st.spinner("Thinking..."):
-            response = run_async(st.session_state.agent.send_message(prompt))
-            st.markdown(response)
-            st.session_state.messages.append({"role": "assistant", "content": response})
+        if "agent" in st.session_state:
+            with st.spinner("Thinking..."):
+                response = run_async(st.session_state.agent.send_message(prompt))
+                st.markdown(response)
+                st.session_state.messages.append({"role": "assistant", "content": response})
+        else:
+             st.error("Agent is not initialized. Please provide API keys in the sidebar.")
 
 # 3. Job Search Section
 st.divider()

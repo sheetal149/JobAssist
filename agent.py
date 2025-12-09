@@ -53,9 +53,15 @@ You are a Senior Career Coach and Recruiter Agent. Your goal is to help the user
 """
 
 class RecruiterAgent:
-    def __init__(self):
-        # Use os.environ as requested
-        self.client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
+    def __init__(self, gemini_api_key: str = None, apify_api_token: str = None):
+        # Use provided key or env var
+        self.gemini_key = gemini_api_key or os.getenv("GEMINI_API_KEY")
+        self.apify_token = apify_api_token or os.getenv("APIFY_TOKEN")
+        
+        if not self.gemini_key:
+            raise ValueError("Gemini API Key is required")
+
+        self.client = genai.Client(api_key=self.gemini_key)
         self.exit_stack = AsyncExitStack()
         self.sessions = {}
         self.tools_map = {} # Map tool name to (session, tool_info)
@@ -128,7 +134,8 @@ class RecruiterAgent:
             """Find jobs using Apify based on keywords and location."""
             print(f"DEBUG: Finding jobs directly for {keywords} in {location}")
             try:
-                return find_jobs_tool(keywords, location)
+                # Pass the instance's apify_token
+                return find_jobs_tool(keywords, location, api_token=self.apify_token)
             except Exception as e:
                 print(f"Error finding jobs: {e}")
                 return f"Error finding jobs: {e}"

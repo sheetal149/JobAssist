@@ -6,13 +6,14 @@ from apify_client import ApifyClient
 # Load environment variables
 load_dotenv()
 
-def find_jobs(keywords: str, location: str) -> str:
+def find_jobs(keywords: str, location: str, api_token: str = None) -> str:
     """
     Find jobs using Apify based on keywords and location.
     
     Args:
         keywords: Search keywords for the job (mapped to title).
         location: Location to search for jobs.
+        api_token: Optional Apify API token.
         
     Returns:
         A JSON string containing a list of jobs with Title, Company, and URL.
@@ -23,9 +24,9 @@ def find_jobs(keywords: str, location: str) -> str:
     
     print(f"DEBUG: Searching for keywords='{keywords}', location='{location}'")
 
-    api_token = os.getenv("APIFY_TOKEN")
-    if not api_token:
-        return "Error: APIFY_TOKEN environment variable not set."
+    token = api_token or os.getenv("APIFY_TOKEN")
+    if not token:
+        return "Error: Apify API token not provided."
 
     # Initialize the ApifyClient
     client = ApifyClient(api_token)

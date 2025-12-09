@@ -6,61 +6,84 @@ An intelligent agent that acts as a Senior Career Coach. It analyzes your resume
 - **Resume Analysis**: Extracts text from PDF resumes and provides a summary, skill gap analysis, and preparation strategy.
 - **Job Search**: Scrapes real-time job listings from LinkedIn and Naukri using Apify.
 - **Smart Recommendations**: Matches your profile with the top 5 most relevant job openings.
-
-## Project Structure
-- `app.py`: The main Streamlit web application.
-- `agent.py`: The core agent logic using Google Gemini.
-- `job_search_tool.py`: Tool for searching jobs on LinkedIn and Naukri.
-- `.env`: Configuration file for API keys.
-- `requirements.txt`: Project dependencies.
+- **Interactive UI**: User-friendly interface built with Streamlit, with secure API key configuration in the sidebar.
 
 ## Prerequisites
 - Python 3.10 or higher
-- [Apify Account](https://apify.com/) (for scraping)
-- [Google Gemini API Key](https://aistudio.google.com/) (for the agent)
+- [Git](https://git-scm.com/downloads)
+- [Google Cloud CLI](https://cloud.google.com/sdk/docs/install) (for deployment)
+- [Docker](https://www.docker.com/) (optional, for containerization)
 
-## Setup
+## Installation & Setup
 
-1.  **Clone/Download the repository**.
+### 1. Clone the Repository
+```bash
+git clone https://github.com/sheetal149/JobAssist.git
+cd job-recommender-agent
+```
 
-2.  **Create and Activate a Virtual Environment**:
-    ```bash
-    python -m venv .venv
-    # Windows
-    .\.venv\Scripts\activate
-    # Mac/Linux
-    source .venv/bin/activate
-    ```
+### 2. Create Virtual Environment
+```bash
+python -m venv .venv
 
-3.  **Install Dependencies**:
-    ```bash
-    pip install -r requirements.txt
-    ```
+# Windows
+.\.venv\Scripts\activate
 
-4.  **Configure Environment Variables**:
-    Create a `.env` file in the root directory and add your keys:
-    ```env
-    APIFY_TOKEN="your_apify_token_here"
-    GEMINI_API_KEY="your_gemini_api_key_here"
-    ```
+# Mac/Linux
+source .venv/bin/activate
+```
 
-## Usage
+### 3. Install Requirements
+```bash
+pip install -r requirements.txt
+```
 
-1.  **Run the Web App**:
+## Running the Application
+
+### Option A: Run Locally
+1.  **Launch the App**:
     ```bash
     streamlit run app.py
     ```
+2.  **Configure**: Open the app in your browser (usually `http://localhost:8501`).
+3.  **Enter Keys**: In the sidebar, enter your:
+    - **Google Gemini API Key**: [Get it here](https://aistudio.google.com/)
+    - **Apify API Token**: [Get it here](https://apify.com/)
+4.  **Start**: Upload your resume PDF to begin the analysis.
 
-2.  **Using the App**:
-    - **Upload**: Drag and drop your resume PDF in the sidebar.
-    - **Analyze**: The agent will automatically analyze your profile.
-    - **Chat**: Ask questions like "How can I improve my resume?" or "What skills should I learn?".
-    - **Find Jobs**: Click the "Find Relevant Jobs" button to search LinkedIn and Naukri.
-
-3.  **Run CLI Agent (Optional)**:
+### Option B: Run with Docker
+1.  **Build the Image**:
     ```bash
-    python agent.py
+    docker build -t job-recommender-agent .
     ```
+2.  **Run the Container**:
+    ```bash
+    docker run -p 8080:8501 job-recommender-agent
+    ```
+3.  **Access**: Open `http://localhost:8080` in your browser.
+
+## Deployment to Google Cloud Run
+
+To deploy this application to Google Cloud Run, follow these steps:
+
+1.  **Authenticate**:
+    ```bash
+    gcloud auth login
+    gcloud config set project YOUR_PROJECT_ID
+    ```
+
+2.  **Deploy**:
+    Run the following command to build and deploy the container source directly:
+    ```bash
+    gcloud run deploy job-recommender \
+      --source . \
+      --port 8501 \
+      --allow-unauthenticated
+    ```
+
+3.  **Access**:
+    Once deployed, Google Cloud Run will provide a URL (e.g., `https://job-recommender-xyz.run.app`). Open this URL, enter your API keys in the sidebar, and start using the app.
 
 ## Troubleshooting
 - **Import Errors**: Ensure you have activated the virtual environment and installed all requirements.
+- **API Key Errors**: The app requires valid API keys in the sidebar to function. Ensure your keys have the necessary permissions.
